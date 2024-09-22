@@ -1,0 +1,118 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class StudentGradeCalculator extends JFrame {
+
+    // Declare all Swing components
+    private JTextField nameField, mathField, scienceField, englishField;
+    private JLabel totalLabel, avgLabel, gradeLabel;
+    private JButton calcButton;
+
+    public StudentGradeCalculator() {
+        // Set up the frame
+        setTitle("Student Grade Calculation");
+        setSize(400, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        // Create panels for input and output sections
+        JPanel inputPanel = new JPanel(new GridLayout(4, 2, 10, 10));
+        JPanel outputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+
+        // Create input fields and labels
+        inputPanel.add(new JLabel("Student Name:"));
+        nameField = new JTextField(15);
+        inputPanel.add(nameField);
+
+        inputPanel.add(new JLabel("Maths:"));
+        mathField = new JTextField(5);
+        inputPanel.add(mathField);
+
+        inputPanel.add(new JLabel("Science:"));
+        scienceField = new JTextField(5);
+        inputPanel.add(scienceField);
+
+        inputPanel.add(new JLabel("English:"));
+        englishField = new JTextField(5);
+        inputPanel.add(englishField);
+
+        // Create output labels for total, average, and grade
+        outputPanel.add(new JLabel("Total:"));
+        totalLabel = new JLabel("0.0");
+        outputPanel.add(totalLabel);
+
+        outputPanel.add(new JLabel("Avg:"));
+        avgLabel = new JLabel("0.0");
+        outputPanel.add(avgLabel);
+
+        outputPanel.add(new JLabel("Grade:"));
+        gradeLabel = new JLabel("-");
+        outputPanel.add(gradeLabel);
+
+        // Create the calculate button
+        calcButton = new JButton("Calc");
+        calcButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateGrade();
+            }
+        });
+
+        // Set layout for the main panel and add components
+        setLayout(new BorderLayout());
+        add(inputPanel, BorderLayout.NORTH);
+        add(outputPanel, BorderLayout.CENTER);
+        add(calcButton, BorderLayout.SOUTH);
+    }
+
+    // Method to calculate total, average, and grade
+    private void calculateGrade() {
+        try {
+            // Retrieve input values
+            String studentName = nameField.getText();
+            int mathMarks = Integer.parseInt(mathField.getText());
+            int scienceMarks = Integer.parseInt(scienceField.getText());
+            int englishMarks = Integer.parseInt(englishField.getText());
+
+            // Calculate total and average
+            int total = mathMarks + scienceMarks + englishMarks;
+            double average = total / 3.0;
+
+            // Determine grade
+            String grade;
+            if (average >= 90) {
+                grade = "A+";
+            } else if (average >= 80) {
+                grade = "B+";
+            } else if (average >= 70) {
+                grade = "B";
+            } else if (average >= 60) {
+                grade = "C+";
+            } else if (average >= 50) {
+                grade = "C";
+            } else if (average >= 40) {
+                grade = "D+";
+            } else {
+                grade = "E";
+            }
+
+            // Set output labels
+            totalLabel.setText(String.valueOf(total));
+            avgLabel.setText(String.format("%.1f", average));
+            gradeLabel.setText(grade);
+
+        } catch (NumberFormatException ex) {
+            // Handle invalid number input
+            JOptionPane.showMessageDialog(this, "Please enter valid marks for all subjects.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // Main method to run the application
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new StudentGradeCalculator().setVisible(true);
+        });
+    }
+}
