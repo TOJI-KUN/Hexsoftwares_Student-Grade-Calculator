@@ -1,118 +1,247 @@
-import javax.swing.*;
+/**
+ * GradeCalculator Class for CSC212 :: hw3p2
+ *
+ * @author      Devon Blandin
+ * @contact     dblandin@gmail.com
+ * @date        7/3/12
+ */
+
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
+import javax.swing.*;
 
-public class StudentGradeCalculator extends JFrame {
+public class GradeCalculator extends JFrame
+{
+    // frame
+    private JFrame frame;
+    private final int WIDTH;
+    private final int HEIGHT;
+    private final int NUM_EXAMS;
 
-    // Declare all Swing components
-    private JTextField nameField, mathField, scienceField, englishField;
-    private JLabel totalLabel, avgLabel, gradeLabel;
-    private JButton calcButton;
+    // arrays for subject labels and text fields
+    private JLabel[] subjectsLs;
+    private JTextField[] subjectsTFs;
 
-    public StudentGradeCalculator() {
-        // Set up the frame
-        setTitle("Student Grade Calculation");
-        setSize(400, 300);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+    // result labels and text fields
+    private JLabel totalL;
+    private JTextField totalTF;
+    private JLabel gradeL;
+    private JTextField gradeTF;
 
-        // Create panels for input and output sections
-        JPanel inputPanel = new JPanel(new GridLayout(4, 2, 10, 10));
-        JPanel outputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+    // buttons
+    private JButton calculateGradeB;
+    private JButton clearB;
 
-        // Create input fields and labels
-        inputPanel.add(new JLabel("Student Name:"));
-        nameField = new JTextField(15);
-        inputPanel.add(nameField);
+    // event handler
+    private ButtonHandler buttonHandler;
+    private KeyPressHandler keyPressHandler;
 
-        inputPanel.add(new JLabel("Maths:"));
-        mathField = new JTextField(5);
-        inputPanel.add(mathField);
+    // default constructor
+    // sets title to "Grade Calculator", numExams to 6, WIDTH to 300
+    public GradeCalculator()
+    {
+        // setup frame values
+        super("Grade Calculator");
+        this.NUM_EXAMS = 6;
+        this.WIDTH = 300;
+        this.HEIGHT = this.NUM_EXAMS * 50 + 100;
 
-        inputPanel.add(new JLabel("Science:"));
-        scienceField = new JTextField(5);
-        inputPanel.add(scienceField);
-
-        inputPanel.add(new JLabel("English:"));
-        englishField = new JTextField(5);
-        inputPanel.add(englishField);
-
-        // Create output labels for total, average, and grade
-        outputPanel.add(new JLabel("Total:"));
-        totalLabel = new JLabel("0.0");
-        outputPanel.add(totalLabel);
-
-        outputPanel.add(new JLabel("Avg:"));
-        avgLabel = new JLabel("0.0");
-        outputPanel.add(avgLabel);
-
-        outputPanel.add(new JLabel("Grade:"));
-        gradeLabel = new JLabel("-");
-        outputPanel.add(gradeLabel);
-
-        // Create the calculate button
-        calcButton = new JButton("Calc");
-        calcButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                calculateGrade();
-            }
-        });
-
-        // Set layout for the main panel and add components
-        setLayout(new BorderLayout());
-        add(inputPanel, BorderLayout.NORTH);
-        add(outputPanel, BorderLayout.CENTER);
-        add(calcButton, BorderLayout.SOUTH);
     }
+    // convenience constructor
+    // sets 'numExams' to numExams
+    public GradeCalculator(int numExams)
+    {
+        // setup frame values
+        super("Grade Calculator");
+        this.NUM_EXAMS = numExams;
+        this.WIDTH = 300;
+        this.HEIGHT = this.NUM_EXAMS * 50 + 100;
+    }
+    public void setupGui()
+    {
+        // setup subject arrays
+        this.subjectsLs = new JLabel[this.NUM_EXAMS];
+        this.subjectsTFs = new JTextField[this.NUM_EXAMS];
 
-    // Method to calculate total, average, and grade
-    private void calculateGrade() {
-        try {
-            // Retrieve input values
-            String studentName = nameField.getText();
-            int mathMarks = Integer.parseInt(mathField.getText());
-            int scienceMarks = Integer.parseInt(scienceField.getText());
-            int englishMarks = Integer.parseInt(englishField.getText());
+        for (int i = 0; i < this.NUM_EXAMS; i++)
+        {
+            this.subjectsLs[i] = new JLabel("Subject " + (i + 1) + ": ", SwingConstants.RIGHT);
+            this.subjectsTFs[i] = new JTextField();
+        }
 
-            // Calculate total and average
-            int total = mathMarks + scienceMarks + englishMarks;
-            double average = total / 3.0;
+        this.calculateGradeB = new JButton("Determine Grade");
+        this.clearB = new JButton("Clear");
 
-            // Determine grade
-            String grade;
-            if (average >= 90) {
-                grade = "A+";
-            } else if (average >= 80) {
-                grade = "B+";
-            } else if (average >= 70) {
-                grade = "B";
-            } else if (average >= 60) {
-                grade = "C+";
-            } else if (average >= 50) {
-                grade = "C";
-            } else if (average >= 40) {
-                grade = "D+";
-            } else {
-                grade = "E";
-            }
+        this.gradeTF = new JTextField("");
+        this.totalTF = new JTextField("0");
+        this.gradeTF.setHorizontalAlignment(SwingConstants.CENTER);
+        this.gradeTF.setEnabled(false);
+        this.totalTF.setHorizontalAlignment(SwingConstants.CENTER);
+        this.totalTF.setEnabled(false);
 
-            // Set output labels
-            totalLabel.setText(String.valueOf(total));
-            avgLabel.setText(String.format("%.1f", average));
-            gradeLabel.setText(grade);
+        this.setSize(this.WIDTH, this.HEIGHT);
 
-        } catch (NumberFormatException ex) {
-            // Handle invalid number input
-            JOptionPane.showMessageDialog(this, "Please enter valid marks for all subjects.", "Error", JOptionPane.ERROR_MESSAGE);
+        this.setLayout(new GridLayout(this.NUM_EXAMS + 3, 2));
+
+        for (int i = 0; i < this.NUM_EXAMS; i++)
+        {
+            this.add(this.subjectsLs[i]);
+            this.add(this.subjectsTFs[i]);
+        }
+
+        this.add(new JLabel("Total: ", SwingConstants.RIGHT));
+        this.add(this.totalTF);
+        this.add(new JLabel("Grade: ", SwingConstants.RIGHT));
+        this.add(this.gradeTF);
+
+        this.add(this.calculateGradeB);
+        this.add(this.clearB);
+
+        buttonHandler = new ButtonHandler();
+
+        keyPressHandler = new KeyPressHandler();
+
+        calculateGradeB.addActionListener(buttonHandler);
+        clearB.addActionListener(buttonHandler);
+
+        for (int i = 0; i < this.NUM_EXAMS; i++)
+        {
+            this.subjectsTFs[i].addActionListener(keyPressHandler);
         }
     }
 
-    // Main method to run the application
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new StudentGradeCalculator().setVisible(true);
-        });
+    public JLabel[] getSubjectsLs()
+    {
+        return this.subjectsLs;
     }
-}
+
+    public static void main(String[] args)
+    {
+        GradeCalculator gradeCalculator;
+        final int NUM_EXAMS;
+        String response = JOptionPane.showInputDialog("Number of Exams:");
+
+        // catch cancel button press
+        if (response == null)
+            System.exit(0);
+
+        // get exam number input.
+        // default to default constructor (6 exams)
+        if (isInteger(response))
+        {
+            NUM_EXAMS = Integer.parseInt(response);
+            gradeCalculator = new GradeCalculator(NUM_EXAMS);
+        }
+        else
+            gradeCalculator = new GradeCalculator();
+
+        gradeCalculator.setupGui();
+        gradeCalculator.setVisible(true);
+        gradeCalculator.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+    } // end main
+
+    // handles determine grade and clear button presses
+    private class KeyPressHandler implements ActionListener
+    {
+        public void actionPerformed(ActionEvent e)
+        {
+            determineGrade();
+        }
+    }
+
+    private class ButtonHandler implements ActionListener
+    {
+        public void actionPerformed(ActionEvent e)
+        {
+            // check what button was pushed
+            // if clear button was pushed...
+            if (e.getSource() == clearB)
+            {
+                clearInputs();
+            }
+            // otherwise, if calculate button was pushed...
+            else
+            {
+                determineGrade();
+            }
+
+        } //end method actionPerformed
+    } //end class ButtonHandler
+
+    private void clearInputs() {
+        // clear the exam and result text fields
+        for (int i = 0; i < subjectsTFs.length; i++)
+        {
+            subjectsTFs[i].setText("");
+            totalTF.setText("0");
+            gradeTF.setText("");
+        }
+    }
+
+    private void determineGrade ()
+    {
+        // validate input to between 0 and 100 inclusive
+        for (int i = 0; i < subjectsTFs.length; i++)
+        {
+            if (subjectsTFs[i].getText() == null || subjectsTFs[i].getText().isEmpty() || !isInteger(subjectsTFs[i].getText()) || Integer.parseInt(subjectsTFs[i].getText()) < 0)
+                subjectsTFs[i].setText("0");
+            else if (Integer.parseInt(subjectsTFs[i].getText()) > 100)
+            {
+                subjectsTFs[i].setText("100");
+            }
+        }
+
+        // add up exam scores
+        int sum = 0;
+        for (int i = 0; i < subjectsTFs.length; i++)
+        {
+            sum += Integer.parseInt(subjectsTFs[i].getText());
+        }
+
+        // determine the lowest score
+        int lowest = 0;
+        for (int i = 0; i < subjectsTFs.length; i++)
+        {
+            if (Integer.parseInt(subjectsTFs[i].getText()) < Integer.parseInt(subjectsTFs[lowest].getText()))
+                lowest = i;
+        }
+
+        // remove lowest exam score from sum and output sum
+        sum -= Integer.parseInt(subjectsTFs[lowest].getText());
+        totalTF.setText("" + sum + "/" + ((subjectsTFs.length - 1) * 100));
+
+        // calculate average
+        int average = sum / (subjectsTFs.length - 1);
+
+        // determine letter grade
+        char grade = 'A';
+        if (average < 60)
+            grade = 'F';
+        else if (average < 70)
+            grade = 'D';
+        else if (average < 80)
+            grade = 'C';
+        else if (average < 90)
+            grade = 'B';
+
+        // output letter grade
+        gradeTF.setText("" + grade);
+    }
+
+    // returns true if String input is an integer
+    public static boolean isInteger( String input )
+    {
+        try
+        {
+            Integer.parseInt( input );
+            return true;
+        }
+        catch ( Exception e)
+        {
+            return false;
+        }
+    }
+
+} // end GradeCalculator class
+
